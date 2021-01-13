@@ -1,13 +1,13 @@
 {
-  "name": "whatsapp-botto-re",
-  "version": "3.0.1",
-  "description": "Anime Whatsapp Bot",
-  "main": "kntl.js",
+  "name": "new-wibot-anime-whatsapp-bot",
+  "version": "1.0.1",
+  "description": "Whatsapp Bot for Weaboo",
+  "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "test": "node test.js"
   },
-  "author": "SomnathDas & Alen Yohannan",
+  "author": "Ikkehman",
   "license": "GPL-3.0",
   "dependencies": {
     "@open-wa/wa-automate": "^3.1.12",
@@ -55,13 +55,13 @@
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SomnathDas/whatsapp-botto-re.git"
+    "url": "git+https://github.com/ikkehman/new-wibot-anime-whatsapp-bot.git"
   },
   "keywords": [
     "Whatsapp-Bot"
   ],
   "bugs": {
-    "url": "https://github.com/SomnathDas/whatsapp-botto-re.git"
+    "url": "https://github.com/ikkehman/new-wibot-anime-whatsapp-bot.git"
   },
-  "homepage": "https://github.com/SomnathDas/whatsapp-botto-re.git"
+  "homepage": "https://github.com/ikkehman/new-wibot-anime-whatsapp-bot.git"
 }
