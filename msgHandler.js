@@ -63,7 +63,7 @@ module.exports = msgHandler = async (client, message) => {
         if (isCmd && !isGroupMsg) console.log(color('[EXEC]'), color(time, 'yellow'), color(`${command} [${args.length}]`), 'from', color(pushname))
         if (isCmd && isGroupMsg) console.log(color('[EXEC]'), color(time, 'yellow'), color(`${command} [${args.length}]`), 'from', color(pushname), 'in', color(name))
 
-        const owners = ['6281270655552@c.us'] // eg [9190xxxxxxxx, 49xxxxxxxx] replace my number also 
+        const owners = ['628xxxxx@c.us'] // eg [9190xxxxxxxx, 49xxxxxxxx] replace my number also 
         const isowner = owners.includes(sender.id) 
 
         msgFilter.addFilter(from)
