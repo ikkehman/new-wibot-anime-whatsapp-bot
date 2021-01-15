@@ -613,30 +613,6 @@ break
 
 //stiker gerak
 
-case 'stickergif':
-        case 'stikergif':
-            if (isMedia && type == 'video') {
-                if (mimetype === 'video/mp4' && message.duration < 10 || mimetype === 'image/gif' && message.duration < 10) {
-                    var mediaData = await decryptMedia(message, uaOverride)
-                    client.reply(from, '[WAIT] Sedang di proses⏳ silahkan tunggu ± 1 min!', id)
-                    var filename = `./media/stickergif.${mimetype.split('/')[1]}`
-                    await fs.writeFileSync(filename, mediaData)
-                    const { exec } = require("child_process")
-                    await exec(`gify ${filename} ./media/stickergif.mp4 --fps=30 --scale=240:240`, async function (error, stdout, stderr) {
-                        var gif = await fs.readFileSync('./media/stickergif.mp4', { encoding: "base64" })
-                        await client.sendImageAsSticker(from, `data:image/gif;base64,${gif.toString('base64')}`)
-                        .catch(() => {
-                            client.reply(from, 'Maaf filenya terlalu besar!', id)
-                        })
-                    })
-                  } else {
-                    client.reply(from, `[❗] Kirim gif dengan caption *${prefix}stickergif* max 10 sec!`, id)
-                   }
-                } else {
-            client.reply(from, `[❗] Kirim gif dengan caption *${prefix}stickergif*`, id)
-            }
-            break
-
 //end gerak
 
 //tampol
