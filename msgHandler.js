@@ -341,7 +341,7 @@ ${desc}`)
                  await fs.writeFile(filename, buffer)
 
 var nucc = Math.random().toString(36).substr(2, 4);
-request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://3.89.43.142:5000/poto/' + nucc, function (error, response, body) {
+request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://3.85.19.105:5000/poto/' + nucc, function (error, response, body) {
 const data = JSON.parse(body);
 
 var isix = data.results[0].header;
@@ -509,8 +509,10 @@ client.reply(from, teks, id)})
     if (kya == "nakano miku") {
     var kata = ["Pengen cosplay in Nakano Miku 😞 ", "Nakano Miku Best Waifu. NO DEBAT !!!"];
     var cap = kata[Math.floor(Math.random() * kata.length)];
+    client.reply(from, 'Tunggu sebentar, sedang diproses', id)
         client.sendFileFromUrl(from, cewek, 'anime.jpeg', cap)
     } else  {
+    	client.reply(from, 'Tunggu sebentar, sedang diproses', id)
         client.sendFileFromUrl(from, cewek, 'anime.jpeg')
 }
 
@@ -528,6 +530,7 @@ client.reply(from, teks, id)})
   .then((result) => {
     var c = JSON.parse(JSON.stringify(result.data));
     var cewe =  c[Math.floor(Math.random() * c.length)];
+    client.reply(from, 'Tunggu sebentar, sedang diproses', id)
 client.sendFileFromUrl(from, cewe, 'anime.jpeg')   
     });
             break
@@ -610,10 +613,6 @@ client.reply(from, teks, id)})
 }
 break
 //end kode nuklir
-
-//stiker gerak
-
-//end gerak
 
 //tampol
         case 'tampol':
