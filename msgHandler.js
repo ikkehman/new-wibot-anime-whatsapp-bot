@@ -540,29 +540,31 @@ client.sendFileFromUrl(from, cewe, 'anime.jpeg')
 //penyegar NSFW
 
         case 'penyegar18':
-            const bum = ["japan bikini", "Fukada kyoko bikini", "yuka ogura bikini", "kazusa okuyama gravure", "eimi fukada", "japan girl bikini"];
-            let acak = bum[Math.floor(Math.random() * bum.length)]
-            var jav = "http://api.fdci.se/rep.php?gambar=" + acak;
-            const isnsfw = nsfwgrp.includes(from)
-            if (isGroupMsg) {
-                if ((isGroupMsg) && (isnsfw)) {
-                        axios.get(jav)
-                        .then((result) => {
-                            var datajav = JSON.parse(JSON.stringify(result.data));
-                            var isijav =  datajav[Math.floor(Math.random() * datajav.length)];
-                            client.sendFileFromUrl(from, isijav, 'anime.jpeg')   
-                        });
-                } else if ((isGroupMsg) && (!isnsfw)) {
-                        await client.reply(from, `NSFW mode belum di aktifkan di grup *${name}*. Mintalah admin aktifkan dengan ketik *!aktif nsfw* `, id)
-                      }
-            } else { 
-                    axios.get(jav)
-                        .then((result) => {
-                            var c = JSON.parse(JSON.stringify(result.data));
-                            var isijav =  c[Math.floor(Math.random() * c.length)];
-                            client.sendFileFromUrl(from, isijav, 'anime.jpeg')   
-                        });
-            }
+            try {
+                const response1 = await axios.get('https://meme-api.herokuapp.com/gimme/gravure/');
+                const {
+                       postLink,
+                       title,
+                       subreddit,
+                       url,
+                       nsfw,
+                       spoiler
+                   } = response1.data
+   
+                   const isnsfw = nsfwgrp.includes(from)
+                   if (isGroupMsg) {
+                         if ((isGroupMsg) && (isnsfw)) {
+                                   await client.sendFileFromUrl(from, `${url}`, 'Reddit.jpg', `${title}`)
+                         } else if ((isGroupMsg) && (!isnsfw)) {
+                                   await client.reply(from, `NSFW mode belum di aktifkan di grup *${name}*. Mintalah admin aktifkan dengan ketik *!aktif nsfw* `, id)
+                         }
+                   } else { 
+                         await client.sendFileFromUrl(from, `${url}`, 'Reddit.jpg', `${title}`)
+                   }
+                   } catch(err) {
+                       console.log(err)
+                       await client.reply(from, 'Kosong???', id) 
+                   }
              
             break
 
