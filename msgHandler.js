@@ -149,15 +149,16 @@ ${desc}`)
 
 //grup menu aktif            
         case 'aktif':
+            const nsfwimg = './media/images/nsfwimg.jpg'
              arg = body.trim().split(' ')
              if (!isGroupAdmins) return client.reply(from, 'Menu ini hanya untuk Admin!', id)
                     if (arg[1].toLowerCase() == 'nsfw') {
                     if (nsfwgrp.includes(chat.id)) {
-                client.reply(from, `NSFW mode sudah ON *${name}*`, message.id)
+                        client.reply(from, `NSFW memang mode sudah ON *${name}*`, message.id)
                     } else {
                         nsfwgrp.push(chat.id)
                         fs.writeFileSync('./lib/nsfw.json', JSON.stringify(nsfwgrp))
-                        client.reply(from, `NSFW mode ON di grup *${name}*`, message.id)
+                        client.sendImage(chat.groupMetadata.id, nsfwimg, 'nsfwimg.jpg', `NSFW mode ON di grup *${name}*. Sekarang kalian bisa akses menu NSFW`)
                 }
             }
              break
@@ -341,7 +342,7 @@ ${desc}`)
                  await fs.writeFile(filename, buffer)
 
 var nucc = Math.random().toString(36).substr(2, 4);
-request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://3.85.19.105:5000/poto/' + nucc, function (error, response, body) {
+request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://54.224.54.29:5000/poto/' + nucc, function (error, response, body) {
 const data = JSON.parse(body);
 
 var isix = data.results[0].header;
@@ -401,7 +402,7 @@ client.reply(from, teks, id)})
                  const filename = `./media/images/sauce.jpg`
                  await fs.writeFile(filename, buffer)
                  var nucc = Math.random().toString(36).substr(2, 4);
-request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://3.85.19.105:5000/poto/' + nucc, function (error, response, body) {
+request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://54.92.173.125:5000/poto/' + nucc, function (error, response, body) {
 const data = JSON.parse(body);
 
 var isix = data.results[0].header;
@@ -523,7 +524,7 @@ client.reply(from, teks, id)})
 
         case 'penyegar':
             client.reply(from, 'Tunggu sebentar, sedang diproses', id)
-            const list = ["Cosplaystyle anime kawaii", "hijab cantik", "japanese girl", "Cosplaystyle anime women"];
+            const list = ["Cosplaystyle anime kawaii", "japanese girl", "Cosplaystyle anime women"];
             let kyb = list[Math.floor(Math.random() * list.length)]
             var urk = "http://api.fdci.se/rep.php?gambar=" + kyb;
              axios.get(urk)
@@ -580,7 +581,7 @@ if (isNaN(nuc)) {
     client.reply(from, 'Masukan kode yang benar, misalnya !nh 177013', id)
 } else {
 
-minta('http://3.85.19.105/' + nuc, function (error, response, body) {
+minta('http://54.224.54.29/' + nuc, function (error, response, body) {
 const data = JSON.parse(body);
 
 if (data.title == null) {
@@ -607,8 +608,19 @@ var teks = `*Judul*: ${data.title}
 *Link*: ${data.link}`
 
 var video = data.pages[0];
-client.sendFileFromUrl(from, video, 'nucc.jpg', teks, id).catch(() => {
-client.reply(from, teks, id)}) 
+
+const isnsfw = nsfwgrp.includes(from)
+if (isGroupMsg) {
+    if ((isGroupMsg) && (isnsfw)) {
+        client.sendFileFromUrl(from, video, 'nucc.jpg', teks, id).catch(() => {
+            client.reply(from, teks, id)}) 
+    } else if ((isGroupMsg) && (!isnsfw)) {
+              client.reply(from, `NSFW mode belum di aktifkan di grup *${name}*. Mintalah admin aktifkan dengan ketik *!aktif nsfw* `, id)
+    }
+} else { 
+    client.sendFileFromUrl(from, video, 'nucc.jpg', teks, id).catch(() => {
+        client.reply(from, teks, id)}) 
+}
 };
 });
 }
@@ -634,6 +646,8 @@ break
             break
 
         case 'admin':
+            if(!isGroupMsg) return client.reply(from, 'Hanya untuk grup chat', message.id)
+            if(!isGroupAdmins) return client.reply(from, 'Maaf, anda bukan admin', message.id)
             client.reply(from, mimin(prefix, pushname), id)
             break
 
