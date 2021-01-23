@@ -635,6 +635,17 @@ break
             client.sendTextWithMentions(from, '@' + person + ' *nampol* ' + arg[1])
             break
 //end tampol
+
+
+//tampol
+case 'kiss':
+    arg = body.trim().split(' ')
+    const person = author.replace('@c.us', '')
+    await client.sendGiphyAsSticker(from, 'https://media.giphy.com/media/mrCaNIVJcUhj942ZT3/giphy.gif')
+    client.sendTextWithMentions(from, '@' + person + ' *mencium* ' + arg[1])
+    break
+//end tampol
+
         case 'help':
         case 'menu':
         if (!isGroupMsg) {
