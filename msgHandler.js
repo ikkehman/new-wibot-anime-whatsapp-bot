@@ -71,7 +71,7 @@ module.exports = msgHandler = async (client, message) => {
             case 'stiker':
             //console.log(type)
                         if (isMedia && type == 'video') {
-                                return await sendSticker.sendAnimatedSticker(message)
+                            await client.reply(from, 'Tidak support Video', id)
                         } else if (isMedia && type == 'image') {
                             const mediaData = await decryptMedia(message)
                             const imageBase64 = `data:${mimetype};base64,${mediaData.toString('base64')}`
@@ -82,11 +82,7 @@ module.exports = msgHandler = async (client, message) => {
                             const imageBase64 = `data:${quotedMsg.mimetype};base64,${mediaData.toString('base64')}`
                             await client.sendImageAsSticker(from, imageBase64)
                     } else if (quotedMsg && quotedMsg.type == 'video') {
-                                if (quotedMsg.duration < 15) {
-                                sendSticker.sendAnimatedSticker(quotedMsgObj)
-                                } else {
-                                await client.reply(from, 'File terlalu besar', id)
-                                } 
+                        await client.reply(from, 'Tidak support Video', id) 
                     } else {
                         client.reply(from, 'Reply atau berikan caption !stiker pada gambar', message.id)
                         }
