@@ -117,14 +117,27 @@ ${desc}`)
 //end info grup
 
 //grup menu banned
-        case 'ban':
-            if(!isowner) return client.reply(from, 'Owner only', message.id)
-            for (let i = 0; i < mentionedJidList.length; i++) {
-                ban.push(mentionedJidList[i])
-                fs.writeFileSync('./lib/banned.json', JSON.stringify(ban))
-                client.reply(from, 'Succes ban target!', message.id)
-            }
-            break          
+case 'ban':
+    if (!isOwnerBot) return client.reply(from, 'Perintah ini hanya untuk Owner bot!', id)
+    if (args.length == 0) return client.reply(from, `Untuk banned seseorang agar tidak bisa menggunakan commands\n\nCaranya ketik: \n${prefix}ban add 628xx --untuk mengaktifkan\n${prefix}ban del 628xx --untuk nonaktifkan\n\ncara cepat ban banyak digrup ketik:\n${prefix}ban @tag @tag @tag`, id)
+    if (args[0] == 'add') {
+        banned.push(args[1]+'@c.us')
+        fs.writeFileSync('./lib/banned.json', JSON.stringify(banned))
+        client.reply(from, 'Success banned target!')
+    } else
+    if (args[0] == 'del') {
+        let xnxx = banned.indexOf(args[1]+'@c.us')
+        banned.splice(xnxx,1)
+        fs.writeFileSync('./lib/banned.json', JSON.stringify(banned))
+        client.reply(from, 'Success unbanned target!')
+    } else {
+     for (let i = 0; i < mentionedJidList.length; i++) {
+        banned.push(mentionedJidList[i])
+        fs.writeFileSync('./lib/banned.json', JSON.stringify(banned))
+        client.reply(from, 'Success ban target!', id)
+        }
+    }
+    break      
 // end grup menu banned   
 
 //grup menu musnahkan             
@@ -220,6 +233,22 @@ ${desc}`)
             }
             break
 //end menu kick
+
+//add member
+
+case 'add':
+    if(!isGroupMsg) return client.reply(from, 'Hanya untuk grup chat', message.id)
+    if(!isGroupAdmins) return client.reply(from, 'Maaf, anda bukan admin', message.id)
+    if(!isBotGroupAdmins) return client.reply(from, 'WiBot harus jadi admin untuk menu ini', message.id)
+    if (args.length !== 1) return client.reply(from, `Untuk menggunakan ${prefix}add\nPenggunaan: ${prefix}add <nomor>\ncontoh: ${prefix}add 628xxx`, id)
+        try {
+            await client.addParticipant(from,`${args[0]}@c.us`)
+        } catch {
+            client.reply(from, 'Gagal menambahkan target', id)
+        }
+    break
+
+//end
 
 //hapus
         case 'delete':
