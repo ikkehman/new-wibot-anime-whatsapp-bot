@@ -48,7 +48,7 @@ module.exports = msgHandler = async (client, message) => {
     const groupAdmins = isGroupMsg ? await client.getGroupAdmins(groupId) : ''
     const isGroupAdmins = isGroupMsg ? groupAdmins.includes(sender.id) : false
         const isBotGroupAdmins = isGroupMsg ? groupAdmins.includes(botNumber + '@c.us') : false
-    if (isCmd && ban.includes(sender.id)) return client.reply(from, 'You\'re banned!', id)
+    if (isCmd && ban.includes(sender.id)) return client.reply(from, 'Kamu di banned karena nyepam!', id)
     if ((message.type == 'sticker') && (stickerArr.includes(message.filehash))) return await sticker.stickerHandler(message, client, isGroupAdmins, isBotGroupAdmins, groupAdmins, color, time)
     if (isGroupMsg && isRule && (type === 'chat' && message.body.includes('chat.whatsapp.com') && isBotGroupAdmins) && !isGroupAdmins) return await client.removeParticipant(chat.id, author)
         if (isCmd && msgFilter.isFiltered(from) && !isGroupMsg) return console.log(color('[SPAM!]', 'red'), color(time, 'yellow'), color(`${command} [${args.length}]`), 'from', color(pushname))
@@ -58,7 +58,7 @@ module.exports = msgHandler = async (client, message) => {
         if (isCmd && !isGroupMsg) console.log(color('[EXEC]'), color(time, 'yellow'), color(`${command} [${args.length}]`), 'from', color(pushname))
         if (isCmd && isGroupMsg) console.log(color('[EXEC]'), color(time, 'yellow'), color(`${command} [${args.length}]`), 'from', color(pushname), 'in', color(name))
 
-        const owners = ['628xxxxx@c.us'] // eg [9190xxxxxxxx, 49xxxxxxxx] replace my number also 
+        const owners = ['628xxxx@c.us'] // eg [9190xxxxxxxx, 49xxxxxxxx] replace my number also 
         const isowner = owners.includes(sender.id) 
 
         msgFilter.addFilter(from)
@@ -118,7 +118,7 @@ ${desc}`)
 
 //grup menu banned
         case 'ban':
-            if(!isowner) return client.reply(from, 'Harus admin yang invite WiBot!!', message.id)
+            if(!isowner) return client.reply(from, 'Owner only', message.id)
             for (let i = 0; i < mentionedJidList.length; i++) {
                 ban.push(mentionedJidList[i])
                 fs.writeFileSync('./lib/banned.json', JSON.stringify(ban))
@@ -200,7 +200,7 @@ ${desc}`)
 
 //unban
         case 'unban':
-            if(!isowner) return client.reply(from, 'Harus admin yang invite WiBot!!', message.id)
+            if(!isowner) return client.reply(from, 'Owner only', message.id)
             let inx = ban.indexOf(mentionedJidList[0])
             ban.splice(inx, 1)
             fs.writeFileSync('./lib/banned.json', JSON.stringify(ban))
@@ -215,7 +215,7 @@ ${desc}`)
             if(mentionedJidList.length === 0) return client.reply(from, 'Format salah', message.id)
             await client.sendText(from, `Request Accepted! issued:\n${mentionedJidList.join('\n')}`)
             for (let i = 0; i < mentionedJidList.length; i++) {
-                if (groupAdmins.includes(mentionedJidList[i])) return await client.reply(from, '....', message.id)
+                if (groupAdmins.includes(mentionedJidList[i])) return await client.reply(from, 'Tidak boleh kick admin!', message.id)
                 await client.removeParticipant(groupId, mentionedJidList[i])
             }
             break
@@ -333,7 +333,7 @@ ${desc}`)
                  await fs.writeFile(filename, buffer)
 
 var nucc = Math.random().toString(36).substr(2, 4);
-request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://3.93.25.6:5000/poto/' + nucc, function (error, response, body) {
+request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://54.226.218.80:5000/poto/' + nucc, function (error, response, body) {
 const data = JSON.parse(body);
 
 var isix = data.results[0].header;
@@ -393,7 +393,7 @@ client.reply(from, teks, id)})
                  const filename = `./media/images/sauce.jpg`
                  await fs.writeFile(filename, buffer)
                  var nucc = Math.random().toString(36).substr(2, 4);
-request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://3.93.25.6:5000/poto/' + nucc, function (error, response, body) {
+request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://54.226.218.80:5000/poto/' + nucc, function (error, response, body) {
 const data = JSON.parse(body);
 
 var isix = data.results[0].header;
@@ -572,7 +572,7 @@ if (isNaN(nuc)) {
     client.reply(from, 'Masukan kode yang benar, misalnya !nh 177013', id)
 } else {
 
-minta('http://3.93.25.6/' + nuc, function (error, response, body) {
+minta('http://54.226.218.80/' + nuc, function (error, response, body) {
 const data = JSON.parse(body);
 
 if (data.title == null) {
@@ -631,9 +631,9 @@ break
 //tampol
 case 'kiss':
     arg = body.trim().split(' ')
-    const person = author.replace('@c.us', '')
+    const person1 = author.replace('@c.us', '')
     await client.sendGiphyAsSticker(from, 'https://media.giphy.com/media/mrCaNIVJcUhj942ZT3/giphy.gif')
-    client.sendTextWithMentions(from, '@' + person + ' *mencium* ' + arg[1])
+    client.sendTextWithMentions(from, '@' + person1 + ' *mencium* ' + arg[1])
     break
 //end tampol
 

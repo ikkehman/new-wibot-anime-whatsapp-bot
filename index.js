@@ -51,8 +51,8 @@ const startServer = async (client) => {
         client.onAddedToGroup((chat) => {
             const dataUrl1 = './media/images/me-min.jpg'
             let totalMem = chat.groupMetadata.participants.length
-            if (totalMem < 10) { 
-            	client.sendText(chat.id, `Grup cuma punya ${totalMem} member, WiBot cuma mau bergabung di grup minimal 10 orang`).then(() => client.leaveGroup(chat.id))
+            if (totalMem < 15) { 
+            	client.sendText(chat.id, `Grup cuma punya ${totalMem} member, WiBot cuma mau bergabung di grup minimal 15 orang`).then(() => client.leaveGroup(chat.id))
             	client.deleteChat(chat.id)
             } else {
                 client.sendImage(chat.groupMetadata.id, dataUrl1, 'me-min.jpg', `Makasih udah invite WiBot di grup *${chat.contact.name}*. Ketik !menu untuk melihat menu`)
@@ -61,7 +61,7 @@ const startServer = async (client) => {
 
         // listening on Incoming Call
         client.onIncomingCall((call) => {
-            client.sendText(call.peerJid, '...')
+            client.sendText(call.peerJid, 'DILARANG NELPON BOT. KAMU DI BANNED')
             client.contactBlock(call.peerJid)
             ban.push(call.peerJid)
             fs.writeFileSync('./lib/banned.json', JSON.stringify(ban))
