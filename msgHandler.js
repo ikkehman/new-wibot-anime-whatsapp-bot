@@ -578,7 +578,7 @@ client.sendFileFromUrl(from, dewe, 'anime.jpeg')
   .then((result) => {
     var c = JSON.parse(JSON.stringify(result.data));
     var cewe =  c[Math.floor(Math.random() * c.length)];
-client.sendFileFromUrl(from, cewe, 'anime.jpeg', `\n${supp}`)   
+client.sendFileFromUrl(from, cewe, 'anime.jpeg', `${supp}`)   
     });
             break
 
@@ -606,7 +606,7 @@ client.sendFileFromUrl(from, cewe, 'anime.jpeg', `\n${supp}`)
                                    await client.reply(from, `NSFW mode belum di aktifkan di grup *${name}*. Mintalah admin aktifkan dengan ketik *!aktif nsfw* `, id)
                          }
                    } else { 
-                         await client.sendFileFromUrl(from, `${url}`, 'Reddit.jpg', `${title} \n${supp}`,)
+                         await client.sendFileFromUrl(from, `${url}`, 'Reddit.jpg', `*${title}* \n${supp}`,)
                    }
                    } catch(err) {
                        console.log(err)
