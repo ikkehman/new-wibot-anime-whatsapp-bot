@@ -546,7 +546,7 @@ client.reply(from, teks, id)})
         case 'waifu':
             const kyc = message.body.replace('!waifu', '')
             if (kyc == '') {
-              client.sendFileFromUrl(from, errorurl2, 'error.png', 'Masukan nama waifu kamu. Misalnya *!waifu keqing genshin*', id)
+              client.sendFileFromUrl(from, errorurl2, 'error.png', 'Masukan nama waifu kamu + series. Misalnya *!waifu keqing genshin*', id)
               console.log("Sent!")
               return null
               }
