@@ -36,6 +36,7 @@ module.exports = msgHandler = async (client, message) => {
         const { name } = chat
         let { pushname, verifiedName } = sender
         const prefix = '!'
+        var supp = '\nYuk dukung Wibot untuk beli server baru biar ga lag lagi. Donasi ke https://trakteer.id/ikkehman'
         body = (type === 'chat' && body.startsWith(prefix)) ? body : ((type === 'image' && caption || type === 'video' && caption) && caption.startsWith(prefix)) ? caption : ''
         const command = body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase()
         const args = body.slice(prefix.length).trim().split(/ +/).slice(1)
@@ -58,7 +59,7 @@ module.exports = msgHandler = async (client, message) => {
         if (isCmd && !isGroupMsg) console.log(color('[EXEC]'), color(time, 'yellow'), color(`${command} [${args.length}]`), 'from', color(pushname))
         if (isCmd && isGroupMsg) console.log(color('[EXEC]'), color(time, 'yellow'), color(`${command} [${args.length}]`), 'from', color(pushname), 'in', color(name))
 
-        const owners = ['628xxxx@c.us'] // eg [9190xxxxxxxx, 49xxxxxxxx] replace my number also 
+        const owners = ['628xxxxxx@c.us'] // eg [9190xxxxxxxx, 49xxxxxxxx] replace my number also 
         const isowner = owners.includes(sender.id) 
 
         msgFilter.addFilter(from)
@@ -118,22 +119,22 @@ ${desc}`)
 
 //grup menu banned
 case 'ban':
-    if (!isOwnerBot) return client.reply(from, 'Perintah ini hanya untuk Owner bot!', id)
+    if(!isowner) return client.reply(from, 'Owner only', message.id)
     if (args.length == 0) return client.reply(from, `Untuk banned seseorang agar tidak bisa menggunakan commands\n\nCaranya ketik: \n${prefix}ban add 628xx --untuk mengaktifkan\n${prefix}ban del 628xx --untuk nonaktifkan\n\ncara cepat ban banyak digrup ketik:\n${prefix}ban @tag @tag @tag`, id)
     if (args[0] == 'add') {
-        banned.push(args[1]+'@c.us')
-        fs.writeFileSync('./lib/banned.json', JSON.stringify(banned))
-        client.reply(from, 'Success banned target!')
+        ban.push(args[1]+'@c.us')
+        fs.writeFileSync('./lib/banned.json', JSON.stringify(ban))
+        await client.reply(from, 'Success banned target!', id) 
     } else
     if (args[0] == 'del') {
-        let xnxx = banned.indexOf(args[1]+'@c.us')
-        banned.splice(xnxx,1)
-        fs.writeFileSync('./lib/banned.json', JSON.stringify(banned))
-        client.reply(from, 'Success unbanned target!')
+        let xnxx = ban.indexOf(args[1]+'@c.us')
+        ban.splice(xnxx,1)
+        fs.writeFileSync('./lib/banned.json', JSON.stringify(ban))
+        await client.reply(from, 'Success unbanned target!', id) 
     } else {
      for (let i = 0; i < mentionedJidList.length; i++) {
-        banned.push(mentionedJidList[i])
-        fs.writeFileSync('./lib/banned.json', JSON.stringify(banned))
+        ban.push(mentionedJidList[i])
+        fs.writeFileSync('./lib/banned.json', JSON.stringify(ban))
         client.reply(from, 'Success ban target!', id)
         }
     }
@@ -324,18 +325,18 @@ case 'add':
                     const { is_adult, title, title_chinese, title_romaji, title_english, episode, similarity, filename, at, tokenthumb, anilist_id, season } = resolt.docs[0]
                     teks = ''
                     if (similarity < 0.92) {
-                        teks = '*Mungkin judulnya salah. Pastikan yang anda kirim sceneanime. BUKAN FAN ART* :\n\n'
+                        teks = 'Mungkin judulnya salah. Pastikan yang anda kirim scene anime. *BUKAN FAN ART* :\n\n'
                     }
                     teks += `*Kesamaan* : ${(similarity * 100).toFixed(1)}%\n`
                     teks += `*Judul Jepang* : ${title}\n*Ejaan Judul* : ${title_romaji}\n`
+                    teks += `*Episode* : ${episode.toString()}\n`
                     if ( is_adult == true )
                     {
-                        teks += `*Hentai?* : Ya\n`
+                        teks += `*Ini Anime Hentai*\n`
                     } else {
-                        teks += `*Hentai?* : Bukan\n`
+                        teks += `*Ini Bukan Hentai*\n`
                     }
-                    teks += `*Episode* : ${episode.toString()}\n`
-                    teks += `*Tayang Perdana* : ${season}\n`
+                    teks += `*Tayang Perdana* : ${season}\n\n${supp}`
                     var video = `https://trace.moe/thumbnail.php?anilist_id=${anilist_id}&file=${encodeURIComponent(filename)}&t=${at}&token=${tokenthumb}`;
                     client.sendFileFromUrl(from, video, 'anime.jpg', teks, id).catch(() => {
                         client.reply(from, teks, id)
@@ -362,7 +363,7 @@ case 'add':
                  await fs.writeFile(filename, buffer)
 
 var nucc = Math.random().toString(36).substr(2, 4);
-request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://54.226.218.80:5000/poto/' + nucc, function (error, response, body) {
+request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://147.139.170.140:5000/poto/' + nucc, function (error, response, body) {
 const data = JSON.parse(body);
 
 var isix = data.results[0].header;
@@ -422,7 +423,7 @@ client.reply(from, teks, id)})
                  const filename = `./media/images/sauce.jpg`
                  await fs.writeFile(filename, buffer)
                  var nucc = Math.random().toString(36).substr(2, 4);
-request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://54.226.218.80:5000/poto/' + nucc, function (error, response, body) {
+request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://147.139.170.140:5000/poto/' + nucc, function (error, response, body) {
 const data = JSON.parse(body);
 
 var isix = data.results[0].header;
@@ -519,26 +520,52 @@ client.reply(from, teks, id)})
 
 //calon random
         case 'randomanime':
-            client.reply(from, 'Tunggu sebentar, sedang diproses', id)
-            const moe = ["cute waifu", "nakano miku", "keqing genshin impact", "anime girl", "anime waifu"];
-            let kya = moe[Math.floor(Math.random() * moe.length)]
-            var url = "http://api.fdci.se/rep.php?gambar=" + kya;
-             axios.get(url)
-  .then((result) => {
-    var b = JSON.parse(JSON.stringify(result.data));
-    var cewek =  b[Math.floor(Math.random() * b.length)]; 
-
-    if (kya == "nakano miku") {
-    var kata = ["Pengen cosplay in Nakano Miku 😞 ", "Nakano Miku Best Waifu. NO DEBAT !!!"];
-    var cap = kata[Math.floor(Math.random() * kata.length)];
-        client.sendFileFromUrl(from, cewek, 'anime.jpeg', cap)
-    } else  {
-        client.sendFileFromUrl(from, cewek, 'anime.jpeg')
-}
-
-    });
+            const redditurl = ["AnimeGirls", "awwnime"];
+            let linka = redditurl[Math.floor(Math.random() * redditurl.length)]
+            try {
+                const responsesegar = await axios.get('https://meme-api.herokuapp.com/gimme/'+ linka);
+                const {
+                       postLink,
+                       title,
+                       subreddit,
+                       url,
+                       nsfw,
+                       spoiler
+                   } = responsesegar.data
+                   await client.sendFileFromUrl(from, `${url}`, 'Reddit.jpg', `${title} \n${supp}`,)
+                   } catch(err) {
+                       console.log(err)
+                       await client.reply(from, 'Kosong???', id) 
+                   }
+             
             break
 // end calon random
+
+//waifu
+
+        case 'waifu':
+            const kyc = message.body.replace('!waifu', '')
+            if (kyc == '') {
+              client.sendFileFromUrl(from, errorurl2, 'error.png', 'Masukan nama waifu kamu. Misalnya *!waifu keqing genshin*', id)
+              console.log("Sent!")
+              return null
+              }
+            client.reply(from, 'Tunggu sebentar, sedang diproses', id)
+            var urj = "http://api.fdci.se/rep.php?gambar=" + kyc;
+             axios.get(urj)
+  .then((result) => {
+    var d = JSON.parse(JSON.stringify(result.data));
+    var dewe =  d[Math.floor(Math.random() * d.length)];
+                    if (!dewe) {
+              client.sendFileFromUrl(from, errorurl2, 'error.png', 'Maaf waifu kamu tidak ditemukan coba *!waifu keqing genshin*', id)
+              console.log("Sent!")
+              return null
+              }
+client.sendFileFromUrl(from, dewe, 'anime.jpeg')   
+    });
+            break
+
+//end penyegar
 
 //penyegar
 
@@ -551,7 +578,7 @@ client.reply(from, teks, id)})
   .then((result) => {
     var c = JSON.parse(JSON.stringify(result.data));
     var cewe =  c[Math.floor(Math.random() * c.length)];
-client.sendFileFromUrl(from, cewe, 'anime.jpeg')   
+client.sendFileFromUrl(from, cewe, 'anime.jpeg', `\n${supp}`)   
     });
             break
 
@@ -579,7 +606,7 @@ client.sendFileFromUrl(from, cewe, 'anime.jpeg')
                                    await client.reply(from, `NSFW mode belum di aktifkan di grup *${name}*. Mintalah admin aktifkan dengan ketik *!aktif nsfw* `, id)
                          }
                    } else { 
-                         await client.sendFileFromUrl(from, `${url}`, 'Reddit.jpg', `${title}`)
+                         await client.sendFileFromUrl(from, `${url}`, 'Reddit.jpg', `${title} \n${supp}`,)
                    }
                    } catch(err) {
                        console.log(err)
@@ -601,7 +628,7 @@ if (isNaN(nuc)) {
     client.reply(from, 'Masukan kode yang benar, misalnya !nh 177013', id)
 } else {
 
-minta('http://54.226.218.80/' + nuc, function (error, response, body) {
+minta('http://147.139.170.140/' + nuc, function (error, response, body) {
 const data = JSON.parse(body);
 
 if (data.title == null) {
