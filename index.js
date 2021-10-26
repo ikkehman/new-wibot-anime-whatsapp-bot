@@ -1,73 +1,127 @@
-const { create } = require('@open-wa/wa-automate')
-const msgHandler = require('./msgHandler')
+/* eslint-disable no-unused-vars */
+const { create, Client } = require('@open-wa/wa-automate')
+const { color, options } = require('./tools')
+const { ind, eng } = require('./message/text/lang/')
+const { loader } = require('./function')
+const { version, bugs } = require('./package.json')
+const msgHandler = require('./message/index.js')
+const figlet = require('figlet')
+const canvas = require('discord-canvas')
+const config = require('./config.json')
+const ownerNumber = config.ownerBot
 const fs = require('fs-extra')
-const serverOption = {
-    headless: true,
-    cacheEnabled: false,
-    useChrome: false,
-    chromiumArgs: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--aggressive-cache-discard',
-        '--disable-cache',
-        '--disable-application-cache',
-        '--disable-offline-load-stale-cache',
-        '--disk-cache-size=0'
-    ]
-}
+const { groupLimit, memberLimit } = require('./database/bot/setting.json')
+const _ban = JSON.parse(fs.readFileSync('./database/bot/banned.json'))
 
-const opsys = process.platform
-if (opsys === 'win32' || opsys === 'win64') {
-    serverOption.executablePath = 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
-} else if (opsys === 'linux') {
-    serverOption.browserRevision = '737027'
-} else if (opsys === 'darwin') {
-    serverOption.executablePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-}
+const start = (ikkeh = new Client()) => {
+    console.log(color(figlet.textSync('WiBot', 'Larry 3D'), 'cyan'))
+    console.log(color('=> Bot successfully loaded! Database:', 'yellow'), color(loader.getAllDirFiles('./database').length), color('Library:', 'yellow'), color(loader.getAllDirFiles('./lib').length), color('Function:', 'yellow'), color(loader.getAllDirFiles('./function').length))
+    console.log(color('=> Source code version:', 'yellow'), color(version))
+    console.log(color('=> Bugs? Errors? Suggestions? Visit here:', 'yellow'), color(bugs.url))
+    console.log(color('[WIBOT]'), color('WiBot is now online!', 'yellow'))
+    console.log(color('[DEV]', 'cyan'), color('Welcome back, Owner! Hope you are doing well~', 'magenta'))
 
-const startServer = async (client) => {
-        global.sclient = client
-	sendingSticker = []
-    	queueSticker = []
-    	global.sendingAnimatedSticker = []
-    	global.queueAnimatedSticker = []
-    	global.amdownloaden = []
-    	global.queuemp3 = []
-    	global.queuemp4 = []
-    	spamarr = []
-        console.log('[SERVER] Server Started!')
-        // Force it to keep the current session
-        client.onStateChanged((state) => {
-                console.log('[Client State]', state)
-                if (state === 'CONFLICT') client.forceRefocus()
-        })
-        // listening on message
-        client.onMessage((message) => {
-            msgHandler(client, message)
-        })
+    // loader.nocache('../message/index.js', (m) => console.log(color('[WATCH]', 'orange'), color(`=> '${m}'`, 'yellow'), 'file is updated!'))
 
-       
-        
-        client.onAddedToGroup((chat) => {
-            const dataUrl1 = './media/images/me-min.jpg'
+    ikkeh.onStateChanged((state) => {
+        console.log(color('[WIBOT]'), state)
+        if (state === 'UNPAIRED' || state === 'CONFLICT' || state === 'UNLAUNCHED') ikkeh.forceRefocus()
+    })
+    
+        //WHEN BOT IS ADDED TO A GROUP
+        ikkeh.onAddedToGroup(async (chat) => {
             let totalMem = chat.groupMetadata.participants.length
-            if (totalMem < 15) { 
-            	client.sendText(chat.id, `Grup cuma punya ${totalMem} member, WiBot cuma mau bergabung di grup minimal 15 orang`).then(() => client.leaveGroup(chat.id))
-            	client.deleteChat(chat.id)
-            } else {
-                client.sendImage(chat.groupMetadata.id, dataUrl1, 'me-min.jpg', `Makasih udah invite WiBot di grup *${chat.contact.name}*. Ketik !menu untuk melihat menu`)
+                const groups = await ikkeh.getAllGroups()
+                // BOT group count less than
+                if(groups.length > groupLimit){
+                    await ikkeh.sendText(chat.id, 'Maaf, Batas group yang dapat bot tampung sudah penuh. Coba lagi kapan kapan!\n\nKapasitas grup WiBot: 113/110').then(async () =>{
+                        ikkeh.deleteChat(chat.id)
+                        ikkeh.leaveGroup(chat.id)
+                    })
+                }else{
+                    if(chat.groupMetadata.participants.length < memberLimit){
+                        await ikkeh.sendText(chat.id, `Grup cuma punya ${totalMem} member, WiBot cuma mau bergabung di grup minimal ${memberLimit} orang`).then(async () =>{
+                            ikkeh.deleteChat(chat.id)
+                            ikkeh.leaveGroup(chat.id)
+                        })
+                    }else if (chat.groupMetadata.participants.length > memberLimit){
+                  //      client.sendText(chat.id, 'Makasih udah invite WiBot di grup ini. Ketik *!menu* untuk melihat menu')
+                        const dataUrlme= './test/me-min.jpg'
+                          ikkeh.sendImage(chat.groupMetadata.id, dataUrlme, 'me-min.jpg', `Makasih udah invite WiBot di grup *${chat.contact.name}*. Ketik *!menu* untuk melihat menu`)
+                    }
+                }
+        })
+
+    ikkeh.onIncomingCall(async (call) => {
+        ikkeh.sendText(call.peerJid, 'DILARANG NELPON BOT. KAMU DI BANNED').then(() => {
+        ikkeh.contactBlock(call.peerJid).then(() => {
+        _ban.push(call.peerJid)
+        fs.writeFileSync('./database/bot/banned.json', JSON.stringify(banned))
+            });
+        });
+    })
+
+    ikkeh.onGlobalParticipantsChanged(async (event) => {
+        const _welcome = JSON.parse(fs.readFileSync('./database/group/welcome.json'))
+        const isWelcome = _welcome.includes(event.chat)
+        const gcChat = await ikkeh.getChatById(event.chat)
+        const pcChat = await ikkeh.getContact(event.who)
+        let { pushname, verifiedName, formattedName } = pcChat
+        pushname = pushname || verifiedName || formattedName
+        const { name, groupMetadata } = gcChat
+        const botNumbers = await ikkeh.getHostNumber() + '@c.us'
+        try {
+            if (event.action === 'add' && event.who !== botNumbers && isWelcome) {
+                const pic = await ikkeh.getProfilePicFromServer(event.who)
+                if (pic === undefined) {
+                    var picx = './test/xy.png'
+                } else {
+                    picx = pic
+                }
+                const welcomer = await new canvas.Welcome()
+                    .setUsername(pushname)
+                    .setDiscriminator(event.who.substring(6, 10))
+                    .setMemberCount(groupMetadata.participants.length)
+                    .setGuildName(name)
+                    .setAvatar(picx)
+                    .setColor('border', '#00100C')
+                    .setColor('username-box', '#00100C')
+                    .setColor('discriminator-box', '#00100C')
+                    .setColor('message-box', '#00100C')
+                    .setColor('title', '#00FFFF')
+                    .setBackground('https://i.pinimg.com/originals/7f/71/e9/7f71e9d5d2bcc4c055673557078cc09f.png')
+                    .toAttachment()
+                const base64 = `data:image/png;base64,${welcomer.toBuffer().toString('base64')}`
+                await ikkeh.sendFile(event.chat, base64, 'welcome.png', `Selamat datang @${pushname}!\n\nKenalin aku WiBot\n\nSemoga betah terus di grup kami ya~!`)
+            } else if (event.action === 'remove' && event.who !== botNumbers && isWelcome) {
+                const pic = await ikkeh.getProfilePicFromServer(event.who)
+                if (pic === undefined) {
+                    var picxs = './test/xy.png'
+                } else {
+                    picxs = pic
+                }
+                const bye = await new canvas.Goodbye()
+                    .setUsername(pushname)
+                    .setDiscriminator(event.who.substring(6, 10))
+                    .setMemberCount(groupMetadata.participants.length)
+                    .setGuildName(name)
+                    .setAvatar(picxs)
+                    .setColor('border', '#00100C')
+                    .setColor('username-box', '#00100C')
+                    .setColor('discriminator-box', '#00100C')
+                    .setColor('message-box', '#00100C')
+                    .setColor('title', '#00FFFF')
+                    .setBackground('https://i.postimg.cc/cC04nqV6/unnamed.jpg')
+                    .toAttachment()
+                const base64 = `data:image/png;base64,${bye.toBuffer().toString('base64')}`
+                await ikkeh.sendFile(event.chat, base64, 'welcome.png', `Selamat tinggal ${pushname}, kami akan selalu mengenangmu~`)
             }
-        })
+        } catch (err) {
+            console.error(err)
+        }
+    })
+}
 
-        // listening on Incoming Call
-        client.onIncomingCall((call) => {
-            client.sendText(call.peerJid, 'DILARANG NELPON BOT. KAMU DI BANNED')
-            client.contactBlock(call.peerJid)
-            ban.push(call.peerJid)
-            fs.writeFileSync('./lib/banned.json', JSON.stringify(ban))
-        })
-    }
-
-create('session', serverOption)
-    .then(async (client) => startServer(client))
-    .catch((error) => console.log(error))
+create(options(start))
+    .then((ikkeh) => start(ikkeh))
+    .catch((err) => console.error(err))
