@@ -1,21 +1,21 @@
 {
-  "name": "bocchibot",
+  "name": "WiBot",
   "version": "0.7.0",
-  "description": "BocchiBot is a multipurpose WhatsApp bot.",
+  "description": "Whatsapp Bot for Weaboo and Anime Lovers",
   "main": "index.js",
   "scripts": {
     "test": "node ./test/test.js",
     "start": "node index.js"
   },
-  "author": "SlavyanDesu",
+  "author": "IkkehMan",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SlavyanDesu/BocchiBot.git"
+    "url": "https://github.com/ikkehman/new-wibot-anime-whatsapp-bot.git"
   },
   "bugs": {
-    "url": "https://github.com/SlavyanDesu/BocchiBot/issues"
+    "url": "https://github.com/ikkehman/new-wibot-anime-whatsapp-bot/issues"
   },
-  "homepage": "https://github.com/SlavyanDesu/BocchiBot",
+  "homepage": "https://github.com/ikkehman/new-wibot-anime-whatsapp-bot",
   "license": "MIT",
   "dependencies": {
     "@justalk/pornhub-api": "^3.5.0",
