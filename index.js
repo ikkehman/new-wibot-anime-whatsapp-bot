@@ -51,7 +51,21 @@ const start = (ikkeh = new Client()) => {
                     }
                 }
         })
-
+    ikkeh.onMessage((message) => {
+        // Uncomment this code below for activating an automated cache deletion
+        /*
+        ikkeh.getAmountOfLoadedMessages()
+            .then((msg) => {
+                if (msg >= 1000) {
+                    console.log(color('[ikkeh]'), color(`Loaded message reach ${msg}, cuting message cache...`, 'yellow'))
+                    ikkeh.cutMsgCache()
+                    console.log(color('[ikkeh]'), color('Cache deleted!', 'yellow'))
+                }
+            })
+        */
+        msgHandler(ikkeh, message)
+        // require('./message/index.js')(ikkeh, message)
+    })
     ikkeh.onIncomingCall(async (call) => {
         ikkeh.sendText(call.peerJid, 'DILARANG NELPON BOT. KAMU DI BANNED').then(() => {
         ikkeh.contactBlock(call.peerJid).then(() => {

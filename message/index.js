@@ -37,7 +37,6 @@ const webp = require('webp-converter')
 const sharp = require('sharp')
 const saus = sagiri(config.nao, { results: 5 })
 const axios = require('axios')
-const urlShortener = require('../lib/shortener.js')
 const tts = require('node-gtts')
 const nekobocc = require('nekobocc')
 const ffmpeg = require('fluent-ffmpeg')
@@ -75,17 +74,11 @@ const tanggal = moment.tz('Asia/Jakarta').format('DD-MM-YYYY')
 const _nsfw = JSON.parse(fs.readFileSync('./database/group/nsfw.json'))
 const _antilink = JSON.parse(fs.readFileSync('./database/group/antilink.json'))
 const _antinsfw = JSON.parse(fs.readFileSync('./database/group/antinsfw.json'))
-const _leveling = JSON.parse(fs.readFileSync('./database/group/leveling.json'))
 const _welcome = JSON.parse(fs.readFileSync('./database/group/welcome.json'))
-const _autosticker = JSON.parse(fs.readFileSync('./database/group/autosticker.json'))
 const _ban = JSON.parse(fs.readFileSync('./database/bot/banned.json'))
 const _premium = JSON.parse(fs.readFileSync('./database/bot/premium.json'))
 const _mute = JSON.parse(fs.readFileSync('./database/bot/mute.json'))
-const _registered = JSON.parse(fs.readFileSync('./database/bot/registered.json'))
-const _level = JSON.parse(fs.readFileSync('./database/user/level.json'))
 let _limit = JSON.parse(fs.readFileSync('./database/user/limit.json'))
-const _afk = JSON.parse(fs.readFileSync('./database/user/afk.json'))
-const _reminder = JSON.parse(fs.readFileSync('./database/user/reminder.json'))
 const _daily = JSON.parse(fs.readFileSync('./database/user/daily.json'))
 const _setting = JSON.parse(fs.readFileSync('./database/bot/setting.json'))
 let { memberLimit, groupLimit } = _setting
@@ -127,15 +120,11 @@ module.exports = msgHandler = async (ikkeh = new Client(), message) => {
         const isBotGroupAdmins = groupAdmins.includes(botNumber) || false
         const isBanned = _ban.includes(sender.id)
         const isPremium = premium.checkPremiumUser(sender.id, _premium)
-        const isRegistered = register.checkRegisteredUser(sender.id, _registered)
         const isNsfw = isGroupMsg ? _nsfw.includes(groupId) : false
         const isWelcomeOn = isGroupMsg ? _welcome.includes(groupId) : false
         const isDetectorOn = isGroupMsg ? _antilink.includes(groupId) : false
-        const isLevelingOn = isGroupMsg ? _leveling.includes(groupId) : false
-        const isAutoStickerOn = isGroupMsg ? _autosticker.includes(groupId) : false
         const isAntiNsfw = isGroupMsg ? _antinsfw.includes(groupId) : false
         const isMute = isGroupMsg ? _mute.includes(chat.id) : false
-        const isAfkOn = afk.checkAfkUser(sender.id, _afk)
         const isQuotedImage = quotedMsg && quotedMsg.type === 'image'
         const isQuotedVideo = quotedMsg && quotedMsg.type === 'video'
         const isQuotedSticker = quotedMsg && quotedMsg.type === 'sticker'
@@ -195,31 +184,6 @@ module.exports = msgHandler = async (ikkeh = new Client(), message) => {
                         console.log(('[NEUTRAL]'), color('The link is safe!'))
                     }
                 })
-            }
-        }
-
-        // Auto-sticker
-        if (isGroupMsg && isAutoStickerOn && isMedia && isImage && !isCmd) {
-            const mediaData = await decryptMedia(message, uaOverride)
-            const imageBase64 = `data:${mimetype};base64,${mediaData.toString('base64')}`
-            await ikkeh.sendImageAsSticker(from, imageBase64)
-            console.log(`Sticker processed for ${processTime(t, moment())} seconds`)
-        }
-
-        // AFK by Slavyan
-        if (isGroupMsg) {
-            for (let ment of mentionedJidList) {
-                if (afk.checkAfkUser(ment, _afk)) {
-                    const getId = afk.getAfkId(ment, _afk)
-                    const getReason = afk.getAfkReason(getId, _afk)
-                    const getTime = afk.getAfkTime(getId, _afk)
-                    await ikkeh.reply(from, ind.afkMentioned(getReason, getTime), id)
-                }
-            }
-            if (afk.checkAfkUser(sender.id, _afk) && !isCmd) {
-                _afk.splice(afk.getAfkPosition(sender.id, _afk), 1)
-                fs.writeFileSync('./database/user/afk.json', JSON.stringify(_afk))
-                await ikkeh.sendText(from, ind.afkDone(pushname))
             }
         }
         
