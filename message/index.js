@@ -37,6 +37,7 @@ const webp = require('webp-converter')
 const sharp = require('sharp')
 const saus = sagiri(config.nao, { results: 5 })
 const axios = require('axios')
+const urlShortener = require('../lib/shortener.js')
 const tts = require('node-gtts')
 const nekobocc = require('nekobocc')
 const ffmpeg = require('fluent-ffmpeg')
@@ -60,6 +61,7 @@ const cron = require('node-cron')
 const { msgFilter, color, processTime, isUrl, createSerial } = require('../tools')
 const { nsfw, weeaboo, downloader, fun, misc, toxic } = require('../lib')
 const { uploadImages } = require('../tools/fetcher')
+const { fetchJson, getBuffer } = require('../tools/fetcher')
 const { ind, eng } = require('./text/lang/')
 const { daily, level, register, afk, reminder, premium, limit} = require('../function')
 const Exif = require('../tools/exif')
@@ -74,11 +76,17 @@ const tanggal = moment.tz('Asia/Jakarta').format('DD-MM-YYYY')
 const _nsfw = JSON.parse(fs.readFileSync('./database/group/nsfw.json'))
 const _antilink = JSON.parse(fs.readFileSync('./database/group/antilink.json'))
 const _antinsfw = JSON.parse(fs.readFileSync('./database/group/antinsfw.json'))
+const _leveling = JSON.parse(fs.readFileSync('./database/group/leveling.json'))
 const _welcome = JSON.parse(fs.readFileSync('./database/group/welcome.json'))
+const _autosticker = JSON.parse(fs.readFileSync('./database/group/autosticker.json'))
 const _ban = JSON.parse(fs.readFileSync('./database/bot/banned.json'))
 const _premium = JSON.parse(fs.readFileSync('./database/bot/premium.json'))
 const _mute = JSON.parse(fs.readFileSync('./database/bot/mute.json'))
+const _registered = JSON.parse(fs.readFileSync('./database/bot/registered.json'))
+const _level = JSON.parse(fs.readFileSync('./database/user/level.json'))
 let _limit = JSON.parse(fs.readFileSync('./database/user/limit.json'))
+const _afk = JSON.parse(fs.readFileSync('./database/user/afk.json'))
+const _reminder = JSON.parse(fs.readFileSync('./database/user/reminder.json'))
 const _daily = JSON.parse(fs.readFileSync('./database/user/daily.json'))
 const _setting = JSON.parse(fs.readFileSync('./database/bot/setting.json'))
 let { memberLimit, groupLimit } = _setting
@@ -105,6 +113,7 @@ module.exports = msgHandler = async (ikkeh = new Client(), message) => {
         const prefix = config.prefix
         body = (type === 'chat' && body.startsWith(prefix)) ? body : (((type === 'image' || type === 'video') && caption) && caption.startsWith(prefix)) ? caption : ''
         const command = body.slice(1).trim().split(/ +/).shift().toLowerCase()
+        const ask = body.toLowerCase()
         const args = body.trim().split(/ +/).slice(1)
         const uaOverride = config.uaOverride
         const q = args.join(' ')
@@ -120,11 +129,15 @@ module.exports = msgHandler = async (ikkeh = new Client(), message) => {
         const isBotGroupAdmins = groupAdmins.includes(botNumber) || false
         const isBanned = _ban.includes(sender.id)
         const isPremium = premium.checkPremiumUser(sender.id, _premium)
+        const isRegistered = register.checkRegisteredUser(sender.id, _registered)
         const isNsfw = isGroupMsg ? _nsfw.includes(groupId) : false
         const isWelcomeOn = isGroupMsg ? _welcome.includes(groupId) : false
         const isDetectorOn = isGroupMsg ? _antilink.includes(groupId) : false
+        const isLevelingOn = isGroupMsg ? _leveling.includes(groupId) : false
+        const isAutoStickerOn = isGroupMsg ? _autosticker.includes(groupId) : false
         const isAntiNsfw = isGroupMsg ? _antinsfw.includes(groupId) : false
         const isMute = isGroupMsg ? _mute.includes(chat.id) : false
+        const isAfkOn = afk.checkAfkUser(sender.id, _afk)
         const isQuotedImage = quotedMsg && quotedMsg.type === 'image'
         const isQuotedVideo = quotedMsg && quotedMsg.type === 'video'
         const isQuotedSticker = quotedMsg && quotedMsg.type === 'sticker'
@@ -186,6 +199,31 @@ module.exports = msgHandler = async (ikkeh = new Client(), message) => {
                 })
             }
         }
+
+        // Auto-sticker
+        if (isGroupMsg && isAutoStickerOn && isMedia && isImage && !isCmd) {
+            const mediaData = await decryptMedia(message, uaOverride)
+            const imageBase64 = `data:${mimetype};base64,${mediaData.toString('base64')}`
+            await ikkeh.sendImageAsSticker(from, imageBase64)
+            console.log(`Sticker processed for ${processTime(t, moment())} seconds`)
+        }
+
+        // AFK by Slavyan
+        if (isGroupMsg) {
+            for (let ment of mentionedJidList) {
+                if (afk.checkAfkUser(ment, _afk)) {
+                    const getId = afk.getAfkId(ment, _afk)
+                    const getReason = afk.getAfkReason(getId, _afk)
+                    const getTime = afk.getAfkTime(getId, _afk)
+                    await ikkeh.reply(from, ind.afkMentioned(getReason, getTime), id)
+                }
+            }
+            if (afk.checkAfkUser(sender.id, _afk) && !isCmd) {
+                _afk.splice(afk.getAfkPosition(sender.id, _afk), 1)
+                fs.writeFileSync('./database/user/afk.json', JSON.stringify(_afk))
+                await ikkeh.sendText(from, ind.afkDone(pushname))
+            }
+        }
         
         // AUTO REPLY by Piyo >_<
         
@@ -205,11 +243,11 @@ module.exports = msgHandler = async (ikkeh = new Client(), message) => {
             await ikkeh.reply(from, `Halo Kak, ada yg bisa WiBot bantu? Silahkan ketik ${prefix}menu`, id)
         }
 
-        if (chats == '@+14095193062') {
+        if (chats == '@+65xxx') {
             await ikkeh.reply(from, `Halo Kak, ada yg bisa WiBot bantu? Silahkan ketik ${prefix}menu`, id)
         }
         
-        if (chats == '@14095193062') {
+        if (chats == '@65xxx') {
             await ikkeh.reply(from, `Halo Kak, ada yg bisa WiBot bantu? Silahkan ketik ${prefix}menu`, id)
         }
 
@@ -236,6 +274,10 @@ module.exports = msgHandler = async (ikkeh = new Client(), message) => {
             console.log(color('[CMD]'), color(time, 'yellow'), color(`${command} [${args.length}]`), 'from', color(pushname), 'in', color(name || formattedTitle))
             await ikkeh.sendSeen(from)
         }
+        if (!isCmd && !isGroupMsg) {
+            console.log(color('[CHAT]'), color(time, 'yellow'), color(`${ask}`), 'from', color(pushname), 'in', color(name || formattedTitle))
+            await ikkeh.sendSeen(from)
+        }
 
         // Anti-spam
         if (isCmd && !isPremium && !isOwner) msgFilter.addFilter(from)
@@ -256,6 +298,10 @@ module.exports = msgHandler = async (ikkeh = new Client(), message) => {
                     await ikkeh.sendText(from, ind.adminmenu(pushname))
             break
 
+            case 'imgmenu':
+            case 'imagemenu':
+                    await ikkeh.sendText(from, ind.imgmenu(pushname))
+            break
             // Register by Slavyan
             case 'registerx':
                 if (isRegistered) return await ikkeh.reply(from, ind.registeredAlready(), id)
@@ -392,20 +438,6 @@ module.exports = msgHandler = async (ikkeh = new Client(), message) => {
                 }
                 await ikkeh.reply(from, listPremi, id)
             break
-            case 'serialx':
-                if (isGroupMsg) return await ikkeh.reply(from, ind.pcOnly(), id)
-                if (args.length !== 1) return await ikkeh.reply(from, ind.wrongFormat(), id)
-                const serials = args[0]
-                if (register.checkRegisteredUserFromSerial(serials, _registered)) {
-                    const name = register.getRegisteredNameFromSerial(serials, _registered)
-                    const age = register.getRegisteredAgeFromSerial(serials, _registered)
-                    const time = register.getRegisteredTimeFromSerial(serials, _registered)
-                    const id = register.getRegisteredIdFromSerial(serials, _registered)
-                    await ikkeh.sendText(from, ind.registeredFound(name, age, time, serials, id))
-                } else {
-                    await ikkeh.sendText(from, ind.registeredNotFound(serials))
-                }
-            break
             case 'limit':
                 if (isPremium || isOwner) return await ikkeh.reply(from, '⤞ Limit left: ∞ (UNLIMITED)', id)
                 await ikkeh.reply(from, `Sisa Penggunaan: ${limit.getLimit(sender.id, _limit, limitCount)} / ${limitCount}\n\n*_Limit direset pada pukul 00:00 WIB_* \n \n Dapatkan UNLIMITED dengan donasi ke https://saweria.co/ikkehman` , id)
@@ -423,29 +455,6 @@ module.exports = msgHandler = async (ikkeh = new Client(), message) => {
                         console.error(err)
                         await ikkeh.reply(from, 'Error!', id)
                     })
-            break
-            case 'doujinx':
-                if (!isPremium) return await ikkeh.reply(from, ind.notPremium(), id)
-                if (!q) return await ikkeh.reply(from, ind.wrongFormat(), id)
-                if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
-                limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                await ikkeh.reply(from, ind.wait(), id)
-                const doujin_ = await axios.get(`http://lolhuman.herokuapp.com/api/nhentai/${q}?apikey=${config.lol}`)
-                try {
-                    const { title_romaji, title_native, read, file_pdf, info } = doujin_.data.result
-                    const kntl_ = doujin_.data.result.image
-                    const randem = kntl_[Math.floor(Math.random() * kntl_.length)]
-                    const cepete = `_____DOUJIN_____
-*[Title] : ${title_romaji}*
-*[info] : ${info}*
-*[Read] ${read}*
-`
-                    await ikkeh.sendFileFromUrl(from, randem, 'duji.jpg', `${cepete}`, id)
-                    await ikkeh.sendFileFromUrl(from, file_pdf, `${q}.pdf`, `${title_native}`, id)
-                } catch (err) {
-                    console.error(err)
-                    await ikkeh.reply(from, 'Error!', id)
-                }
             break
             case 'kemono':
                 if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
@@ -477,22 +486,6 @@ module.exports = msgHandler = async (ikkeh = new Client(), message) => {
                     .catch(async (err) => {
                         console.error(err)
                         await ikkeh.reply(from, 'Dalam perbaikan!!', id)
-                    })
-            break
-            case 'komikux':
-                if (!q) return await ikkeh.reply(from, ind.wrongFormat(), id)
-                if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
-                limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                await ikkeh.reply(from, ind.wait(), id)
-                weeaboo.manga(q)
-                    .then(async ({ genre, info, link_dl, sinopsis, thumb }) => {
-                        let mangak = `${info}${genre}\nSinopsis: ${sinopsis}\nLink download:\n${link_dl}`
-                        await ikkeh.sendFileFromUrl(from, thumb, 'mangak.jpg', mangak, null, null, true)
-                            .then(() => console.log('Success sending manga info!'))
-                    })
-                    .catch(async (err) => {
-                        console.error(err)
-                        await ikkeh.reply(from, 'Error!', id)
                     })
             break
 
@@ -536,32 +529,24 @@ ikkeh.reply(from, teks, id)})
             break
 //ssf
 
-            case 'source':
-            case 'sauce':
-            const dataUrl1= './test/x.jpeg'
-                if (isMedia && isImage || isQuotedImage) {
-                    if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
-                    limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                    await ikkeh.reply(from, ind.wait(), id)
-                    if(isMedia){
-                        const gambar = await decryptMedia(message, uaOverride)
-                        await processImg(gambar)
-                    } else if (quotedMsg && quotedMsg.type == 'image'){
-                        const compres = await decryptMedia(quotedMsg)
-                        await processImg(compres)
-                    }else{
-                        ikkeh.sendImage(from, dataUrl1, 'tutor.jpeg', `Maaf format salah\n\nSilahkan kirim gambar dengan caption ${prefix}wait atau reply dengan caption ${prefix}wait`, id)
-                    }
-                    async function processImg(gambar) {
-                        let image = await Jimp.read(gambar);
-                        image.write('./temp/sauce.jpg', function (err) {
-                            if (err) console.log(err);
-var nucc = Math.random().toString(36).substr(2, 4);                                
-request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url=http://147.139.175.196:5000/poto/' + nucc, function (error, response, body) {
+//new sauce
+case 'source':
+case 'sauce':
+    const dataUrl1= './test/x.jpeg'
+        if (isMedia && isImage || isQuotedImage) {
+            if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
+            limit.addLimit(sender.id, _limit, isPremium, isOwner)
+            await ikkeh.reply(from, ind.wait(), id)
+            const encryptMedia = isQuotedImage ? quotedMsg : message
+            const mediaData = await decryptMedia(encryptMedia, uaOverride)
+            try {
+                const imageLink = await uploadImages(mediaData, `sauce.${sender.id}`)
+                request('https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=1&api_key=aba222eb501940e4c86031dcd93b2e3dce9e0e8b&url='+ imageLink, function (error, response, body) {
 const data = JSON.parse(body);
 
 var isix = data.results[0].header;
 var isiy = data.results[0].data;
+
 if (isix.index_id == 2 || isix.index_id == 38 || isix.index_id == 18 || isix.index_id == 16 )
 {
 var sumber = isiy.source.replace((/ /g), "%20");
@@ -609,12 +594,17 @@ var video = isix.thumbnail;
 ikkeh.sendFileFromUrl(from, video, 'anime.jpg', teks, id).catch(() => {
 ikkeh.reply(from, teks, id)})
 });
-                        });
-                    }
-                } else {
-                    await ikkeh.sendImage(from, dataUrl1, 'tutor.jpeg', `Maaf format salah\n\nSilahkan kirim gambar dengan caption ${prefix}sauce atau reply dengan caption ${prefix}sauce`, id)
-                }
-            break
+            } catch (err) {
+                console.error(err)
+                console.error(imageLink)
+                await ikkeh.reply(from, 'Error!', id)
+            }
+        } else {
+            await ikkeh.sendImage(from, dataUrl1, 'tutor.jpeg', `Maaf format salah\n\nSilahkan kirim gambar dengan caption ${prefix}sauce atau reply dengan caption ${prefix}sauce`, id)
+        }
+    break
+//new sauce
+
             case 'waifu':
                 if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
                 limit.addLimit(sender.id, _limit, isPremium, isOwner)
@@ -644,6 +634,32 @@ ikkeh.reply(from, teks, id)})
                    }
             break
 
+                case 'character':
+                case 'karakter':
+                if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
+                limit.addLimit(sender.id, _limit, isPremium, isOwner)
+                if (!q) return await ikkeh.reply(from, 'Format salah! masukan kata pencarian misalnya *!character eula*', id)  
+                await ikkeh.reply(from, ind.wait(), id)          
+                    get_result = await fetchJson(`https://api.lolhuman.xyz/api/character?apikey=${config.lol}&query=${q}`)
+                if (get_result.status == 200) {
+                    get_result = get_result.result
+                    ini_txt = `Id : ${get_result.id}\n`
+                    ini_txt += `Name : ${get_result.name.full}\n`
+                    ini_txt += `Native : ${get_result.name.native}\n`
+                    ini_txt += `Favorites : ${get_result.favourites}\n`
+                    ini_txt += `Media : \n`
+                    ini_media = get_result.media.nodes
+                    for (var x of ini_media) {
+                        ini_txt += `- ${x.title.romaji} (${x.title.native})\n`
+                    }
+                    ini_txt += `\nDescription : \n${get_result.description.replace(/__/g, "_")}`
+                    thumbnail = await getBuffer(get_result.image.large)
+                    await ikkeh.sendFileFromUrl(from, `${get_result.image.large}`, 'Reddit.jpg', `${ini_txt}`,id)
+                } else {
+                    await ikkeh.reply(from, 'Karakter yang kamu cari tidak ditemukan. Mungkin dia karakter ampas', id) 
+                }
+            break
+
             case 'penyegar':
                 if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
                 limit.addLimit(sender.id, _limit, isPremium, isOwner)
@@ -661,6 +677,19 @@ ikkeh.reply(from, teks, id)})
                    } catch(err) {
                        console.log(err)
                        await ikkeh.reply(from, 'Waifu kamu tidak ditemukan. Mungkin waifu kamu ampas', id) 
+                   }
+            break
+
+            case 'pixiv':
+                if (!q) return await ikkeh.reply(from, 'Format salah! masukan kode pixiv yang benar misalnya *!pixiv 63456028*', id)            
+                if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
+                    await ikkeh.reply(from, ind.wait(), id)
+                limit.addLimit(sender.id, _limit, isPremium, isOwner)
+                ini_link = `https://api.lolhuman.xyz/api/pixivdl/${q}?apikey==${config.lol}`
+                try {
+                await ikkeh.sendFileFromUrl(from, `${ini_link}`, 'Reddit.jpg', `\n${supp}`,id)
+                } catch(err) {
+                       await ikkeh.reply(from, 'Art tidak ditemukan. Coba cari art lain', id) 
                    }
             break
 
@@ -978,7 +1007,7 @@ ikkeh.reply(from, teks, id)})
 
             // NSFW
             case 'fetish':
-                if (ar.length !== 1) return await ikkeh.reply(from, ind.wrongFormat(), id)
+                if (ar.length !== 1) return await ikkeh.sendText(from, ind.fetish(pushname))
                 if (isGroupMsg) {
                     if (!isNsfw) return await ikkeh.reply(from, ind.notNsfw(), id)
                     if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
@@ -1015,12 +1044,6 @@ ikkeh.reply(from, teks, id)})
                                     await ikkeh.sendFileFromUrl(from, url, 'boobs.jpg', '', id)
                                         .then(() => console.log('Success sending boobs pic!'))
                                 })
-                        } else if (ar[0] === 'belly') {
-                            nsfw.belly()
-                                .then(async ({ url }) => {
-                                    await ikkeh.sendFileFromUrl(from, url, 'belly.jpg', '', id)
-                                        .then(() => console.log('Success sending belly pic!'))
-                                })
                         } else if (ar[0] === 'sideboobs') {
                             nsfw.sideboobs()
                                 .then(async ({ url }) => {
@@ -1033,8 +1056,23 @@ ikkeh.reply(from, teks, id)})
                                     await ikkeh.sendFileFromUrl(from, url, 'ahegao.jpg', '', id)
                                         .then(() => console.log('Success sending ahegao pic!'))
                                 })
+                        } else if (ar[0] === 'futanari') {
+                            ini_futanari = `https://api.lolhuman.xyz/api/random2/futanari?apikey=${config.lol}`
+                            await ikkeh.sendFileFromUrl(from, `${ini_futanari}`, 'Reddit.jpg', `Kami tidak pernah meragukan user, meski fetishnya aneh-aneh.`,id)
+                        } else if (ar[0] === 'anal') {
+                            ini_anal = `https://api.lolhuman.xyz/api/random2/anal?apikey=${config.lol}`
+                            await ikkeh.sendFileFromUrl(from, `${ini_anal}`, 'Reddit.jpg', ``,id)
+                        } else if (ar[0] === 'trap') {
+                            ini_trap = `https://api.lolhuman.xyz/api/random2/trap?apikey=${config.lol}`
+                            await ikkeh.sendFileFromUrl(from, `${ini_trap}`, 'Reddit.jpg', `WHY YOU GEH?`,id)
+                        } else if (ar[0] === 'nekomimi') {
+                            ini_nekomimi = `https://api.lolhuman.xyz/api/random2/lewdkemo?apikey=${config.lol}`
+                            await ikkeh.sendFileFromUrl(from, `${ini_nekomimi}`, 'Reddit.jpg', ``,id)
+                        } else if (ar[0] === 'loli') {
+                            ini_loli = `https://static.wikia.nocookie.net/3f86640f-f9f9-47a8-9146-0c1e1932ab6a`
+                            await ikkeh.sendFileFromUrl(from, `${ini_loli}`, 'Reddit.jpg', `SURPRISE MADAFAKA!!`,id)
                         } else {
-                            await ikkeh.reply(from, 'Tag not found.', id)
+                            await ikkeh.reply(from, 'Tidak Ditemukan. Fetish lu ampas!', id)
                         }
                     } catch (err) {
                         console.error(err)
@@ -1075,12 +1113,6 @@ ikkeh.reply(from, teks, id)})
                                     await ikkeh.sendFileFromUrl(from, url, 'boobs.jpg', '', id)
                                         .then(() => console.log('Success sending boobs pic!'))
                                 })
-                        } else if (ar[0] === 'belly') {
-                            nsfw.belly()
-                                .then(async ({ url }) => {
-                                    await ikkeh.sendFileFromUrl(from, url, 'belly.jpg', '', id)
-                                        .then(() => console.log('Success sending belly pic!'))
-                                })
                         } else if (ar[0] === 'sideboobs') {
                             nsfw.sideboobs()
                                 .then(async ({ url }) => {
@@ -1093,8 +1125,23 @@ ikkeh.reply(from, teks, id)})
                                     await ikkeh.sendFileFromUrl(from, url, 'ahegao.jpg', '', id)
                                         .then(() => console.log('Success sending ahegao pic!'))
                                 })
+                        } else if (ar[0] === 'futanari') {
+                            ini_futanari = `https://api.lolhuman.xyz/api/random2/futanari?apikey=${config.lol}`
+                            await ikkeh.sendFileFromUrl(from, `${ini_futanari}`, 'Reddit.jpg', `Kami tidak pernah meragukan user, meski fetishnya aneh-aneh.`,id)
+                        } else if (ar[0] === 'anal') {
+                            ini_anal = `https://api.lolhuman.xyz/api/random2/anal?apikey=${config.lol}`
+                            await ikkeh.sendFileFromUrl(from, `${ini_anal}`, 'Reddit.jpg', ``,id)
+                        } else if (ar[0] === 'trap') {
+                            ini_trap = `https://api.lolhuman.xyz/api/random2/trap?apikey=${config.lol}`
+                            await ikkeh.sendFileFromUrl(from, `${ini_trap}`, 'Reddit.jpg', `WHY YOU GEH?`,id)
+                        } else if (ar[0] === 'nekomimi') {
+                            ini_nekomimi = `https://api.lolhuman.xyz/api/random2/lewdkemo?apikey=${config.lol}`
+                            await ikkeh.sendFileFromUrl(from, `${ini_nekomimi}`, 'Reddit.jpg', ``,id)
+                        } else if (ar[0] === 'loli') {
+                            ini_loli = `https://static.wikia.nocookie.net/3f86640f-f9f9-47a8-9146-0c1e1932ab6a`
+                            await ikkeh.sendFileFromUrl(from, `${ini_loli}`, 'Reddit.jpg', `SURPRISE MADAFAKA!!`,id)
                         } else {
-                            await ikkeh.reply(from, 'Tag not found.', id)
+                            await ikkeh.reply(from, 'Tidak Ditemukan. Fetish lu ampas!', id)
                         }
                     } catch (err) {
                         console.error(err)
@@ -1202,7 +1249,7 @@ ikkeh.reply(from, teks, id)})
                         })
                 }
             break
-            case 'nekopoi':
+            case 'xnekopoix':
                 if (isGroupMsg) {
                     if (!isNsfw) return await ikkeh.reply(from, ind.notNsfw(), id)
                     if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
@@ -1238,50 +1285,45 @@ ikkeh.reply(from, teks, id)})
                     }
                 }
             break
-            case 'nekosearch':
+            case 'nekopoi':
                 if (!q) return await ikkeh.reply(from, 'Format salah! masukan kata pencarian misalnya *!nekosearch onii chan*', id)
                 if (isGroupMsg) {
                     if (!isNsfw) return await ikkeh.reply(from, ind.notNsfw(), id)
                     if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
                     limit.addLimit(sender.id, _limit, isPremium, isOwner)
                     await ikkeh.reply(from, ind.wait(), id)
-                    try {
-                        const res = await nekobocc.search(q)
-                        let text = '-----[ *NEKOPOI* ]-----'
-                        for (let i = 0; i < res.result.length; i++) {
-                            const { title, link } = res.result[i]
-                            text += `\n\n*Judul*: ${title}\n*Link*: ${link}\n\n=_=_=_=_=_=_=_=_=_=_=_=_=`
-                        }
-                        if (res.result.length >= 1) {
-                            await ikkeh.reply(from, text, id)
-                        } else {
-                            await ikkeh.reply(from, 'Hasil tidak ditemukan', id)
-                        }
-                        
-                    } catch (err) {
-                        console.error(err)
-                        await ikkeh.reply(from, 'Tidak ditemukan', id)
+                    nekos = await fetchJson(`https://api.lolhuman.xyz/api/nekopoisearch?apikey=${config.lol}&query=${q}`)
+                    if (nekos.status == 200) {
+                    get_result = nekos.result
+                    ini_txt = ""
+                    for (var x of get_result) {
+                        ini_txt += `Title : ${x.title}\n`
+                        ini_txt += `Link : ${x.link}\n`
+                        ini_txt += `Thumbnail : ${x.thumbnail}\n\n`
                     }
+                    console.log(nekos.status)
+                    await ikkeh.reply(from, ini_txt, id)
+                } else {
+                    await ikkeh.reply(from, 'Maaf, Hentai Tidak Ditemukan!!', id)
+                }
                 } else {
                     if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
                     limit.addLimit(sender.id, _limit, isPremium, isOwner)
                     await ikkeh.reply(from, ind.wait(), id)
-                    try {
-                        const res = await nekobocc.search(q)
-                        let text = '-----[ *NEKOPOI* ]-----'
-                        for (let i = 0; i < res.result.length; i++) {
-                            const { title, link } = res.result[i]
-                            text += `\n\n*Judul*: ${title}\n*Link*: ${link}\n\n=_=_=_=_=_=_=_=_=_=_=_=_=`
-                        }
-                        if (res.result.length >= 1) {
-                            await ikkeh.reply(from, text, id)
-                        } else {
-                            await ikkeh.reply(from, 'Hasil tidak ditemukan', id)
-                        }
-                    } catch (err) {
-                        console.error(err)
-                        await ikkeh.reply(from, 'Menu dalam Maintenance', id)
+                    nekos = await fetchJson(`https://api.lolhuman.xyz/api/nekopoisearch?apikey=${config.lol}&query=${q}`)
+                    if (nekos.status == 200) {
+                    get_result = nekos.result
+                    ini_txt = ""
+                    for (var x of get_result) {
+                        ini_txt += `Title : ${x.title}\n`
+                        ini_txt += `Link : ${x.link}\n`
+                        ini_txt += `Thumbnail : ${x.thumbnail}\n\n`
                     }
+                    console.log(nekos.status)
+                    await ikkeh.reply(from, ini_txt, id)
+                } else {
+                    await ikkeh.reply(from, 'Maaf, Hentai Tidak Ditemukan!!', id)
+                }
                 }
             break
             case 'yuri':
@@ -1394,7 +1436,40 @@ ikkeh.reply(from, teks, id)})
 //END NH DL
 
             //end penyegar NSFW 
+//panjang
 
+// Photo Oxy //
+                case 'shadow':
+                case 'cup':
+                case 'cup1':
+                case 'romance':
+                case 'smoke':
+                case 'burnpaper':
+                case 'lovemessage':
+                case 'undergrass':
+                case 'love':
+                case 'coffe':
+                case 'woodheart':
+                case 'woodenboard':
+                case 'summer3d':
+                case 'wolfmetal':
+                case 'nature3d':
+                case 'underwater':
+                case 'golderrose':
+                case 'summernature':
+                case 'letterleaves':
+                case 'glowingneon':
+                case 'fallleaves':
+                case 'flamming':
+                case 'harrypotter':
+                case 'carvedwood':
+                if (!q) return await ikkeh.reply(from, 'Format salah! Masukan kata yang ingin dijadikan gambar. Misalnya !romance Eula', id)   
+
+                linkgen = `https://api.lolhuman.xyz/api/photooxy1/${command}?apikey=${config.lol}&text=${q}`
+                await ikkeh.sendFileFromUrl(from, `${linkgen}`, 'Reddit.jpg', `${supp}`,)
+                    break
+
+//wkwk
             // Moderation command
             case 'linkgroup':
                 if (!isGroupMsg) return await ikkeh.reply(from, ind.groupOnly(), id)
@@ -1726,10 +1801,13 @@ ikkeh.reply(from, teks, id)})
                 await ikkeh.reply(from, ind.doneOwner(), id)
                 console.log('Success!')
             break
-
             default:
                 if (isCmd) {
                     await ikkeh.reply(from, ind.cmdNotFound(command), id)
+                } else if (!isCmd && !isGroupMsg && !isImage && !isVideo){
+                        const bacot = message.body
+                        simi = await fetchJson(`https://api.lolhuman.xyz/api/simi?apikey=${config.lol}&text=${bacot}`)
+                        ikkeh.sendText(from, simi.result)  
                 }
             break
         }
