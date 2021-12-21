@@ -8,6 +8,7 @@ Use the Node Package Manager [npm](https://www.npmjs.com/get-npm) to install New
 
 ```bash
 >git clone https://github.com/ikkehman/new-wibot-anime-whatsapp-bot.git
+>cd new-wibot-anime-whatsapp-bot
 >add your api in config.json
 >npm install
 ```
