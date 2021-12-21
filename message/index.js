@@ -740,62 +740,6 @@ ikkeh.reply(from, teks, id)})
              
             break
 // end calon random
-
-            case 'anitokix':
-                if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
-                limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                await ikkeh.reply(from, ind.wait(), id)
-                weeaboo.anitoki()
-                    .then(async ({ result }) => {
-                        let anitoki = '-----[ *ANITOKI LATEST* ]-----'
-                        for (let i = 0; i < result.length; i++) {
-                            anitoki += `\n\n➸ *Title*: ${result[i].title}\n➸ *URL*: ${result[i].link}\n\n=_=_=_=_=_=_=_=_=_=_=_=_=`
-                        }
-                        await ikkeh.reply(from, anitoki, id)
-                    })
-                    .catch(async (err) => {
-                        console.error(err)
-                        await ikkeh.reply(from, 'Error!', id)
-                    })
-            break
-            case 'neonimex':
-                if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
-                limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                await ikkeh.reply(from, ind.wait(), id)
-                weeaboo.neonime()
-                    .then(async ({ status, result }) => {
-                        if (status !== 200) return await ikkeh.reply(from, 'Not found.', id)
-                        let neoInfo = '-----[ *NEONIME LATEST* ]-----'
-                        for (let i = 0; i < result.length; i++) {
-                            const { date, title, link, desc } = result[i]
-                            neoInfo += `\n\n➸ *Title*: ${title}\n➸ *Date*: ${date}\n➸ *Synopsis*: ${desc}\n➸ *Link*: ${link}\n\n=_=_=_=_=_=_=_=_=_=_=_=_=`
-                        }
-                        await ikkeh.reply(from, neoInfo, id)
-                        console.log('Success sending Neonime latest update!')
-                    })
-                    .catch(async (err) => {
-                        console.error(err)
-                        await ikkeh.reply(from, 'Error!', id)
-                    })
-            break
-            case 'anoboyx':
-                if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
-                limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                await ikkeh.reply(from, ind.wait(), id)
-                weeaboo.anoboy()
-                    .then(async ({ result }) => {
-                        let anoboyInfo = '-----[ *ANOBOY ON-GOING* ]-----'
-                        for (let i = 0; i < result.length; i++) {
-                            anoboyInfo += `\n\n➸ *Title*: ${result[i].title}\n➸ *URL*: ${result[i].url}\n\n=_=_=_=_=_=_=_=_=_=_=_=_=`
-                        }
-                        await ikkeh.reply(from, anoboyInfo, id)
-                        console.log('Success sending on-going anime!')
-                    })
-                    .catch(async (err) => {
-                        console.error(err)
-                        await ikkeh.reply(from, 'Error!', id)
-                    })
-            break
             case 'nimesticker': // by CHIKAA CHANTEKKXXZZ
             case 'nimestiker': 
                 if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
@@ -812,63 +756,6 @@ ikkeh.reply(from, teks, id)})
                     })
             break
             // Sticker
-            case 'stikernobgx':
-            case 'stickernobgx': //by: VideFrelan
-                if (isMedia && type === 'image' || isQuotedImage) {
-                    if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
-                    limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                    await ikkeh.reply(from, ind.wait(), id)
-                    const encryptMedia = isQuotedImage ? quotedMsg : message
-                    const mediaData = await decryptMedia(encryptMedia, uaOverride)
-                    const q = await uploadImages(mediaData, `stickernobg.${sender.id}`)
-                    misc.stickernobg(q)
-                    .then(async ({ result }) => {
-                        await ikkeh.sendStickerfromUrl(from, result.image)
-                        console.log('Success sending Sticker no background!')
-                    })
-                } else {
-                    await ikkeh.reply(from, ind.wrongFormat(), id)
-                }
-            break
-            case 'stickerwmx': // By Slavyan
-            case 'stcwmx':
-                if (!isPremium) return await ikkeh.reply(from, ind.notPremium(), id)
-                if (!q.includes('|')) return await ikkeh.reply(from, ind.wrongFormat(), id)
-                if (isMedia && isImage || isQuotedImage) {
-                    if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
-                    limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                    await ikkeh.reply(from, ind.wait(), id)
-                    const packname = q.substring(0, q.indexOf('|') - 1)
-                    const author = q.substring(q.lastIndexOf('|') + 2)
-                    exif.create(packname, author, `stc_${sender.id}`)
-                    const encryptMedia = isQuotedImage ? quotedMsg : message
-                    const mediaData = await decryptMedia(encryptMedia, uaOverride)
-                    webp.buffer2webpbuffer(mediaData, 'jpg', '-q 100')
-                        .then((res) => {
-                            sharp(res)
-                                .resize(512, 512)
-                                .toFile(`./temp/stage_${sender.id}.webp`, async (err) => {
-                                    if (err) return console.error(err)
-                                    await exec(`webpmux -set exif ./temp/stc_${sender.id}.exif ./temp/stage_${sender.id}.webp -o ./temp/${sender.id}.webp`, { log: true })
-                                    if (fs.existsSync(`./temp/${sender.id}.webp`)) {
-                                        const data = fs.readFileSync(`./temp/${sender.id}.webp`)
-                                        const base64 = `data:image/webp;base64,${data.toString('base64')}`
-                                        await ikkeh.sendRawWebpAsSticker(from, base64)
-                                        console.log(`Sticker processed for ${processTime(t, moment())} seconds`)
-                                        fs.unlinkSync(`./temp/${sender.id}.webp`)
-                                        fs.unlinkSync(`./temp/stage_${sender.id}.webp`)
-                                        fs.unlinkSync(`stc_${sender.id}`)
-                                    }
-                                })
-                        })
-                        .catch(async (err) => {
-                            console.error(err)
-                            await ikkeh.reply(from, 'Error!', id)
-                        })
-                    } else {
-                        await ikkeh.reply(from, ind.wrongFormat(), id)
-                    }
-            break
             case 'stickermemex':
             case 'stcmemex':
                 if (!q.includes('|')) return await ikkeh.reply(from, ind.wrongFormat(), id)
@@ -956,18 +843,6 @@ ikkeh.reply(from, teks, id)})
                     await ikkeh.reply(from, `Tidak ada video! Reply atau berikan caption ${prefix}stiker pada video`, id)
                 }
             break
-            case 'ttg':
-                if (!q) return await ikkeh.reply(from, 'Masukan kata yang ingin dijadikan stiker. Misalnya *!ttg halo*', id)
-                if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
-                limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                await ikkeh.reply(from, ind.wait(), id)
-                await ikkeh.sendStickerfromUrl(from, `https://api.vhtear.com/textxgif?text=${q}&apikey=${config.vhtear}`)
-                    .then(() => console.log('Success creating GIF!'))
-                    .catch(async (err) => {
-                        console.error(err)
-                        await ikkeh.reply(from, 'Jangan gunakan emot. Hanya teks!', id)
-                    })
-            break
             case 'stickertoimg':
             case 'stikertoimg':
             case 'toimg':
@@ -986,23 +861,6 @@ ikkeh.reply(from, teks, id)})
                 } else {
                     await ikkeh.reply(from, 'Reply pada stiker', id)
                 }
-            break
-            case 'emojisticker':
-            case 'emojistiker':
-                if (args.length !== 1) return ikkeh.reply(from, ind.wrongFormat(), id)
-                if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
-                limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                const emoji = emojiUnicode(args[0])
-                await ikkeh.reply(from, ind.wait(), id)
-                console.log('Creating emoji code for =>', emoji)
-                await ikkeh.sendStickerfromUrl(from, `https://api.vhtear.com/emojitopng?code=${emoji}&apikey=${config.vhtear}`)
-                    .then(async () => {
-                        console.log(`Sticker processed for ${processTime(t, moment())} seconds`)
-                    })
-                    .catch(async (err) => {
-                        console.error(err)
-                        await ikkeh.reply(from, 'Emoji not supported!', id)
-                    })
             break
 
             // NSFW
@@ -1247,42 +1105,6 @@ ikkeh.reply(from, teks, id)})
                             console.error(err)
                             await ikkeh.reply(from, 'Error!', id)
                         })
-                }
-            break
-            case 'xnekopoix':
-                if (isGroupMsg) {
-                    if (!isNsfw) return await ikkeh.reply(from, ind.notNsfw(), id)
-                    if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
-                    limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                    await ikkeh.reply(from, ind.wait(), id)
-                    try {
-                        const res = await nekobocc.latest()
-                        let text = '-----[ *NEKOPOI* ]-----'
-                        for (let i = 0; i < res.result.length; i++) {
-                            const { title, link } = res.result[i]
-                            text += `\n\n*Judul*: ${title}\n*Link*: ${link}\n\n=_=_=_=_=_=_=_=_=_=_=_=_=`
-                        }
-                        await ikkeh.reply(from, text, id)
-                    } catch (err) {
-                        console.error(err)
-                        await ikkeh.reply(from, 'Menu dalam Maintenance', id)
-                    }
-                } else {
-                    if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await ikkeh.reply(from, ind.limit(), id)
-                    limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                    await ikkeh.reply(from, ind.wait(), id)
-                    try {
-                        const res = await nekobocc.latest()
-                        let text = '-----[ *NEKOPOI* ]-----'
-                        for (let i = 0; i < res.result.length; i++) {
-                            const { title, link } = res.result[i]
-                            text += `\n\n*Judul*: ${title}\n*Link*: ${link}\n\n=_=_=_=_=_=_=_=_=_=_=_=_=`
-                        }
-                        await ikkeh.reply(from, text, id)
-                    } catch (err) {
-                        console.error(err)
-                        await ikkeh.reply(from, 'Error!', id)
-                    }
                 }
             break
             case 'nekopoi':
