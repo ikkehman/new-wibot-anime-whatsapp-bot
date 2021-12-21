@@ -192,10 +192,10 @@ exports.menu = (pushname) => {
 
     -----[ *DAFTAR PERINTAH MEMBER* ]-----
 *!menu / !help*  ~>  Menampilkan menu utama
+*!imgmenu*  ~>  Menampilkan menu khusus gambar
 *!sticker*  ~>  buat stiker
 *!stickergif*  ~>  buat stiker gif/video
 *!nimesticker*  ~>  random stiker anime
-*!ttg*  ~>  text to gif stiker
 *!toimg*  ~>  stiker to image
 *!anibatch*  ~>  download anime batch
 *!wait*  ~>  cari judul anime
@@ -207,6 +207,7 @@ exports.menu = (pushname) => {
 *!limit*  ~> lihat batas pemakaian 
 *!tampol (nama)*  ~>  nampol member 
 *!kiss (nama)*  ~> cium member
+*!pixiv*  ~>  Cari Artwork Pixiv
 *!delete*  ~> hapus pesan milik bot
 *!report*  ~> report bug
     
@@ -216,9 +217,9 @@ exports.menu = (pushname) => {
 *!penyegar18*  ~>  penyegar timeline yg lebih segar
 *!nhdl (kode)*  ~> download nuklir
 *!nhsearch*  ~> cari hentai
-*!nekopoi*  ~> hentai terbaru nekopoi
-*!nekosearch*  ~> mencari hentai nekopoi
+*!nekopoi*  ~> mencari hentai nekopoi
 *!yuri*  ~> asupan kebutuhan harian
+*!fetish*  ~> asupan fetish kesukaanmu
     
 Yuk dukung Wibot untuk beli server baru biar ga lag lagi. Donasi ke https://saweria.co/ikkehman
 Made with hateful, crazy and desperate 🤪 by IkkehMan`
@@ -229,10 +230,10 @@ exports.dewe = (pushname) => {
 
     -----[ *DAFTAR PERINTAH* ]-----
 *!menu / !help*  ~>  Menampilkan menu utama
+*!imgmenu*  ~>  Menampilkan menu khusus gambar
 *!sticker*  ~>  buat stiker
 *!stickergif*  ~>  buat stiker gif/video
 *!nimesticker*  ~>  random stiker anime
-*!ttg*  ~>  text to gif stiker
 *!toimg*  ~>  stiker to image
 *!anibatch*  ~>  download anime batch
 *!wait*  ~>  cari judul anime
@@ -244,6 +245,8 @@ exports.dewe = (pushname) => {
 *!limit*  ~> lihat batas pemakaian 
 *!tampol (nama)*  ~>  nampol member 
 *!kiss (nama)*  ~> cium member
+*!pixiv*  ~>  Cari Artwork Pixiv
+*!character*  ~>  Cari Karakter
 *!delete*  ~> hapus pesan milik bot
 *!report*  ~> report bug
     
@@ -253,9 +256,9 @@ exports.dewe = (pushname) => {
 *!penyegar18*  ~>  penyegar timeline yg lebih segar
 *!nhdl (kode)*  ~> download nuklir
 *!nhsearch*  ~> cari hentai
-*!nekopoi*  ~> hentai terbaru nekopoi
-*!nekosearch*  ~> mencari hentai nekopoi
+*!nekopoi*  ~> mencari hentai nekopoi
 *!yuri*  ~> asupan kebutuhan harian
+*!fetish*  ~> asupan fetish kesukaanmu
     
     Yuk dukung Wibot untuk beli server baru biar ga lag lagi. Donasi ke https://saweria.co/ikkehman
     Made with hateful, crazy and desperate 🤪 by IkkehMan
@@ -282,10 +285,58 @@ Made with hateful, crazy and desperate 🤪 by IkkehMan
     `
 }
 
-exports.rules = () => {
-    return `
------[ RULES ]-----
+exports.fetish= (pushname) => {
+    return `Hai, kak ${pushname}, fetish kamu apa?.   
 
-Rules? I am the rules!!!
+    -----[ *DAFTAR FETISH* ]-----
+*!fetish armpits*  ~>  Fetish Ketecc
+*!fetish feets*  ~>  Fetish Kaki
+*!fetish thighs*  ~>  Fetish Paha
+*!fetish ass*  ~>  Fetish Bokong
+*!fetish boobs*  ~>  Fetish OPPAI
+*!fetish sideboobs*  ~>  Fetish Sideboobs
+*!fetish ahegao*  ~>  Fetish Ahegao
+*!fetish futanari*  ~>  Fetish Futanari
+*!fetish anal*  ~>  Fetish Anal
+*!fetish trap*  ~>  Fetish Trap
+*!fetish nekomimi*  ~>  Fetish Nekomimi
+    
+Yuk dukung Wibot untuk beli server baru biar ga lag lagi. Donasi ke https://saweria.co/ikkehman
+Made with hateful, crazy and desperate 🤪 by IkkehMan
+    `
+}
+
+exports.imgmenu= (pushname) => {
+    return `Ketik perintah spasi kata yang mau kamu jadikan gambar.
+misalnya: !romance Eula   
+
+    -----[ *DAFTAR TEMPLATE* ]-----
+*!shadow*  ~>  
+*!cup*  ~>  
+*!cup1*  ~>  
+*!romance*  ~>  
+*!smoke*  ~>  
+*!burnpaper*  ~>  
+*!lovemessage*  ~>  
+*!undergras*  ~>  
+*!love*  ~>  
+*!coffe*  ~>  
+*!woodheart*  ~>  
+*!woodenboard*  ~>  
+*!summer3d*  ~>  
+*!wolfmetal*  ~>  
+*!nature3d*  ~>  
+*!underwater*  ~>  
+*!golderrose*  ~>  
+*!summernatur*  ~>  
+*!letterleaves*  ~>  
+*!glowingneon*  ~>  
+*!fallleaves*  ~>  
+*!flamming*  ~>  
+*!harrypotter*  ~>  
+*!carvedwood*  ~>  
+    
+Yuk dukung Wibot untuk beli server baru biar ga lag lagi. Donasi ke https://saweria.co/ikkehman
+Made with hateful, crazy and desperate 🤪 by IkkehMan
     `
 }

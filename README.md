@@ -22,7 +22,7 @@ npm start
 | Menu |Works?|
 | ------------- | ------------- |
 | Image Sticker |✅|
-| Video Sticker |❌|
+| Video Sticker |✅|
 | What's Anime? |✅|
 | Find Sauce Doujin |✅|
 | Nucc Code Lookup |✅|

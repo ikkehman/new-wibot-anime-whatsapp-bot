@@ -1108,6 +1108,7 @@ ikkeh.reply(from, teks, id)})
                 }
             break
             case 'nekopoi':
+            case 'nekosearch':
                 if (!q) return await ikkeh.reply(from, 'Format salah! masukan kata pencarian misalnya *!nekosearch onii chan*', id)
                 if (isGroupMsg) {
                     if (!isNsfw) return await ikkeh.reply(from, ind.notNsfw(), id)
