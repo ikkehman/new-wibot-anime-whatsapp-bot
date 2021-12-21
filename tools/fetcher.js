@@ -9,14 +9,17 @@ const FormData = require('form-data')
  * @param {object} [options]
  * @returns {Promise<object>} 
  */
-const fetchJson = (url, options) => {
-    return new Promise((resolve, reject) => {
-        return fetch(url, options)
-            .then((response) => response.json())
-            .then((json) => resolve(json))
-            .catch((err) => reject(err))
-    })
-}
+
+exports.fetchJson = fetchJson = (url, options) => new Promise(async(resolve, reject) => {
+    fetch(url, options)
+        .then(response => response.json())
+        .then(json => {
+            resolve(json)
+        })
+        .catch((err) => {
+            reject(err)
+        })
+})
 
 /**
  * Fetch text from URL.
@@ -48,6 +51,14 @@ const fetchBuffer = (url, options) => {
     })
 }
 
+exports.getBuffer = getBuffer = async(url) => {
+    const res = await fetch(url, { headers: { 'User-Agent': 'okhttp/4.5.0' }, method: 'GET' })
+    if (!res.ok) throw "Error while fetching data"
+    const buff = await res.buffer()
+    if (buff) return buff
+        //if (buff)
+        //    return { type: res.headers.get('content-type'), result: buff }
+}
 /**
  * Upload images to telegra.ph server.
  * @param {Buffer} buffData 
@@ -83,5 +94,6 @@ module.exports = {
     fetchJson,
     fetchText,
     fetchBuffer,
+    getBuffer,
     uploadImages
 }
