@@ -1,12 +1,12 @@
 {
-    "ownerBot": "", 
+    "ownerBot": "L maroval", 
     "prefix": "!",
     "uaOverride": "WhatsApp/2.2037.6 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36",
-    "token": "api-key",
-    "nao": "api-key",
-    "vhtear": "api-key",
+    "token": "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",
+    "nao": "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",
+    "vhtear": "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",
     "melodic": "administrator",
     "tobz": "BotWeA",
-    "xteam": "api-key", 
-    "lol":  "api-key"
+    "xteam": "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", 
+    "lol":  "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"
 }
