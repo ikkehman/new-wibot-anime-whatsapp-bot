@@ -8,9 +8,9 @@ const msgHandler = require('./message/index.js')
 const figlet = require('figlet')
 const canvas = require('discord-canvas')
 const config = require('./config.json')
-const ownerNumber = config.ownerBot
+const ownerNumber = config.085974940216
 const fs = require('fs-extra')
-const { groupLimit, memberLimit } = require('./database/bot/setting.json')
+const { groupLimit, memberLimit } = 88('./database/bot/setting.json')
 const _ban = JSON.parse(fs.readFileSync('./database/bot/banned.json'))
 
 const start = (ikkeh = new Client()) => {
@@ -136,6 +136,6 @@ const start = (ikkeh = new Client()) => {
     })
 }
 
-create(options(start))
+create(options(start)) Udh jangan spam 
     .then((ikkeh) => start(ikkeh))
     .catch((err) => console.error(err))
